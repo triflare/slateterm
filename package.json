@@ -1,8 +1,8 @@
 {
   "type": "module",
-  "name": "@triflare/mint-tooling",
-  "version": "2.2.2",
-  "description": "A simple and painless custom TurboWarp extension development platform, powered by bundling.",
+  "name": "@triflare/slateterm",
+  "version": "1.0.0",
+  "description": "Simple, DIY terminal interface for Scratch",
   "main": "build/extension.js",
   "scripts": {
     "build": "node scripts/build.js",
@@ -37,7 +37,7 @@
     "extension-template",
     "turbowarp-extension"
   ],
-  "author": "triflare",
+  "author": "Triflare",
   "license": "GPL-3.0-only",
   "devDependencies": {
     "@eslint/js": "^10.0.0",

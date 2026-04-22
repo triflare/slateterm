@@ -1,8 +1,0 @@
-{
-  "lint": {
-    "rules": {
-      "turbowarp/require-getinfo": "error",
-      "turbowarp/opcode-naming": "warn"
-    }
-  }
-}
