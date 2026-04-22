@@ -1,8 +1,4 @@
-# Contributing to Mint
-
-> [!INFO]
->
-> If you're reading this and you've just forked this repository, you may want to replace all mentions of the Mint toolchain with your extension's name.
+# Contributing to SlateTerm
 
 ## What You'll Need
 
@@ -13,7 +9,7 @@
 
 ## Understanding the Build Script
 
-Mint's build script is something called a "bundler", which means it concatenates _(or combines)_ a set of files into one. In Mint's case, the files it bundles are called "modules" or "ES modules". If you know about Webpack, you'll know exactly what we mean.
+SlateTerm's build script is something called a "bundler", which means it concatenates _(or combines)_ a set of files into one. In SlateTerm's case, the files it bundles are called "modules" or "ES modules". If you know about Webpack, you'll know exactly what we mean.
 
 The build process outputs three files:
 
@@ -41,15 +37,15 @@ If AI code is used, it should meet or exceed human standards. We have both human
 
 ## Quality Over All
 
-Triflare believes in quality over quantity. We want to keep our tools opinionated, so we will keep ensuring quality to keep it that way. For example, our goal is to turn Mint into something that all TurboWarp extension developers use to code their extensions.
+Triflare believes in quality over quantity. We want to keep our tools opinionated, so we will keep ensuring quality to keep it that way.
 
 ## Testing Your Extension Logic
 
-Mint ships a built-in unit-test scaffold powered by Node's native test runner (`node:test`). No extra frameworks or configuration files are needed.
+SlateTerm ships a built-in unit-test scaffold powered by Node's native test runner (`node:test`). No extra frameworks or configuration files are needed.
 
 ## Linting & Formatting Presets
 
-Mint ships TurboWarp-focused ESLint defaults in `eslint.config.mjs`, including checks for:
+SlateTerm ships TurboWarp-focused ESLint defaults in `eslint.config.mjs`, including checks for:
 
 - `turbowarp/require-getinfo`
 - `turbowarp/opcode-naming`
@@ -70,6 +66,8 @@ Mint ships TurboWarp-focused ESLint defaults in `eslint.config.mjs`, including c
 - `turbowarp/should-not-translate`
 
 You can customize lint severities with `.mintrc.json`:
+
+> Note that "Mint" here refers to SlateTerm's development toolchain.
 
 ```json
 {

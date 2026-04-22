@@ -1,37 +1,32 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Mint logo" width="75">
+  <img src="src/assets/icons/menu.svg" alt="SlateTerm logo" width="75">
 </p>
 
 <h1 align="center">
-  Mint Tooling
+  SlateTerm
 </h1>
 
 <p align="center">
-  <a href="https://github.com/triflare/mint-tooling/actions/workflows/ci.yml">
-    <img src="https://github.com/triflare/mint-tooling/actions/workflows/ci.yml/badge.svg" alt="Continuous integration">
+  <a href="https://github.com/triflare/slateterm/actions/workflows/ci.yml">
+    <img src="https://github.com/triflare/slateterm/actions/workflows/ci.yml/badge.svg" alt="Continuous integration">
   </a>
-    <a href="https://github.com/triflare/mint-tooling/actions/workflows/cd.yml">
-    <img src="https://github.com/triflare/mint-tooling/actions/workflows/cd.yml/badge.svg" alt="Continuous deployment">
+    <a href="https://github.com/triflare/slateterm/actions/workflows/cd.yml">
+    <img src="https://github.com/triflare/slateterm/actions/workflows/cd.yml/badge.svg" alt="Continuous deployment">
   </a>
 </p>
 
 ## Introduction
 
-> A simple and painless custom TurboWarp extension development platform, powered by bundling.
+SlateTerm is a simple, DIY terminal interface for your Scratch projects. It appears on top of your Scratch stage, and turns your project into a mini-TUI.
 
-Have you ever tried to contribute to a custom TurboWarp extension, but got overwhelmed by the pure size of the file? Mint's mission is to fix this issue.
-
-With a bundling solution powered by Node.js, you can now build custom TurboWarp extensions modularly! With the power of JS modules, you can build a custom TurboWarp extension without even touching the 1,000 lines of code you would have had to use if you were to develop it normally.
-
-The only monolith you'll ever have to even see is the build output!
+You can modify the opacity of SlateTerm so your stage can be visible as well!
 
 ## Key Features
 
-- **Bundling:** Powered by Node.js, you don't have to edit a huge file just to make a small patch to your custom extension. You can simply edit the file where the logic is held!
-- **In-repo documentation:** A separate documentation repository isn't required &mdash; just edit the `/docs/` folder, and link to that in your extension _(just remember to make it a URL and not a file path)_.
-- **Extensive CI/CD:** One of Mint's main features is automation &mdash; you get CodeQL, Dependabot, auto PR checking, and more right out of the box when you use Mint as your toolchain.
-- **Template gallery:** Start quickly with extension templates for common patterns in [`templates/`](./templates/README.md).
+- **Built on a proven bundling toolchain:** SlateTerm is powered by a bundling toolchain for custom TurboWarp extensions.
+- **Easy to use:** There is no heavy configuration or pre-setup to do before using SlateTerm to its fullest. Just import the extension, and start logging!
+- **True terminal:** SlateTerm is powered by some of the same technologies that real terminals like Ubuntu/Windows' terminal software use.
 
-## Quick Start
+## Documentation
 
-If you copied this repository as your project template, follow [SETUP.MD](./SETUP.MD).
+If you want a more practical guide, see the [table of contents](./docs/toc.md).

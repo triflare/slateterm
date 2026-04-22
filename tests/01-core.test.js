@@ -1,80 +1,190 @@
 /**
- * Unit tests for src/01-core.js (TurboWarpExtension class)
- *
- * The Scratch global mock must be installed before the core module is imported,
- * because 01-core.js calls Scratch.extensions.register() at module load time.
- * The mock captures the registered instance so the class methods can be tested.
+ * Unit tests for SlateTermExtension and its split module behavior.
  */
-
-import { describe, it } from 'node:test';
+import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { installScratchMock } from './helpers/mock-scratch.js';
+import { SlateTermExtension } from '../src/01-core.js';
+import '../src/02-runtime.js';
+import '../src/03-logging.js';
+import '../src/04-rendering.js';
 
-// Install the mock and capture the registered extension instance.
-const { mock } = installScratchMock();
-let extension;
-mock.extensions.register = instance => {
-  extension = instance;
-};
+function installDomMock() {
+  const originalDocument = globalThis.document;
+  const originalRaf = globalThis.requestAnimationFrame;
+  const listeners = new Map();
 
-// Top-level await: load the core module so registration fires.
-await import('../src/01-core.js');
+  const ctx = {
+    scale: () => {},
+    clearRect: () => {},
+    fillRect: () => {},
+    fillText: () => {},
+    measureText: () => ({ width: 8 }),
+  };
 
-describe('TurboWarpExtension — registration', () => {
-  it('registers an extension instance with Scratch', () => {
-    assert.ok(extension, 'Scratch.extensions.register should have been called');
+  globalThis.document = {
+    createElement() {
+      return {
+        style: {},
+        addEventListener(event, callback) {
+          listeners.set(event, callback);
+        },
+        getContext() {
+          return ctx;
+        },
+      };
+    },
+    addEventListener(event, callback) {
+      listeners.set(event, callback);
+    },
+  };
+
+  globalThis.requestAnimationFrame = () => 0;
+
+  return {
+    triggerKeydown(event) {
+      const callback = listeners.get('keydown');
+      if (callback) callback({ preventDefault: () => {}, ...event });
+    },
+    restore() {
+      if (originalDocument === undefined) delete globalThis.document;
+      else globalThis.document = originalDocument;
+      if (originalRaf === undefined) delete globalThis.requestAnimationFrame;
+      else globalThis.requestAnimationFrame = originalRaf;
+    },
+  };
+}
+
+describe('SlateTermExtension', () => {
+  let extension;
+  let restoreScratch;
+  let dom;
+
+  before(() => {
+    const scratch = installScratchMock();
+    restoreScratch = scratch.restore;
+    dom = installDomMock();
+    extension = new SlateTermExtension();
+    extension.draw = () => {};
   });
-});
 
-describe('TurboWarpExtension — helloWorld()', () => {
-  it('returns "hello world!"', () => {
-    assert.equal(extension.helloWorld(), 'hello world!');
-  });
-});
-
-describe('TurboWarpExtension — add()', () => {
-  it('adds two numbers', () => {
-    assert.equal(extension.add({ A: 3, B: 4 }), 7);
+  after(() => {
+    restoreScratch();
+    dom.restore();
   });
 
-  it('coerces string arguments to numbers', () => {
-    assert.equal(extension.add({ A: '5', B: '2' }), 7);
+  it('initializes with expected default state', () => {
+    assert.equal(extension.visible, false);
+    assert.equal(extension.opacity, 0.85);
+    assert.equal(extension.history.length, 0);
+    assert.equal(extension.historyLimit, 1000);
   });
 
-  it('adds 0 + 1 = 1', () => {
-    assert.equal(extension.add({ A: 0, B: 1 }), 1);
-  });
-});
-
-describe('TurboWarpExtension — sayHello()', () => {
-  it('delegates to sayHelloImpl and returns a greeting', () => {
-    assert.equal(extension.sayHello({ NAME: 'World' }), 'Hello, World!');
-  });
-});
-
-describe('TurboWarpExtension — colorBlock()', () => {
-  it('returns the selected color string', () => {
-    assert.equal(extension.colorBlock({ COLOR: '#FF0000' }), 'Selected color: #FF0000');
-  });
-});
-
-describe('TurboWarpExtension — getInfo()', () => {
-  it('returns an object with an id and name', () => {
-    const info = extension.getInfo();
-    assert.equal(typeof info.id, 'string');
-    assert.equal(typeof info.name, 'string');
+  it('exposes the correct block opcodes in getInfo()', () => {
+    const opcodes = extension.getInfo().blocks.map(block => block.opcode);
+    assert.ok(opcodes.includes('manageTerminal'));
+    assert.ok(opcodes.includes('setOpacity'));
+    assert.ok(opcodes.includes('setVerbose'));
+    assert.ok(opcodes.includes('logMessage'));
+    assert.ok(opcodes.includes('replaceLastLine'));
+    assert.ok(opcodes.includes('askPrompt'));
+    assert.ok(opcodes.includes('getHistory'));
   });
 
-  it('exposes a non-empty blocks array', () => {
-    const { blocks } = extension.getInfo();
-    assert.ok(Array.isArray(blocks) && blocks.length > 0, 'blocks should be a non-empty array');
+  it('manageTerminal show/hide/clear modifies extension state', () => {
+    extension.manageTerminal({ ACTION: 'show' });
+    assert.equal(extension.visible, true);
+    assert.equal(extension.canvas.style.display, 'block');
+
+    extension.manageTerminal({ ACTION: 'hide' });
+    assert.equal(extension.visible, false);
+    assert.equal(extension.canvas.style.display, 'none');
+
+    extension.history.push({
+      type: 'Info',
+      message: 'hello',
+      spriteName: 'Stage',
+      indent: 0,
+      realTime: Date.now(),
+      isFinalizedLoading: false,
+    });
+    extension.manageTerminal({ ACTION: 'clear' });
+    assert.equal(extension.history.length, 0);
+    assert.equal(extension.activeLoaders.length, 0);
   });
 
-  it('declares all expected block opcodes', () => {
-    const opcodes = extension.getInfo().blocks.map(b => b.opcode);
-    assert.ok(opcodes.includes('helloWorld'), 'missing opcode: helloWorld');
-    assert.ok(opcodes.includes('add'), 'missing opcode: add');
-    assert.ok(opcodes.includes('colorBlock'), 'missing opcode: colorBlock');
-    assert.ok(opcodes.includes('sayHello'), 'missing opcode: sayHello');
+  it('setOpacity clamps values to a valid range', () => {
+    extension.setOpacity({ OPACITY: '200' });
+    assert.equal(extension.opacity, 1);
+
+    extension.setOpacity({ OPACITY: '-100' });
+    assert.equal(extension.opacity, 0);
+
+    extension.setOpacity({ OPACITY: '50' });
+    assert.equal(extension.opacity, 0.5);
+  });
+
+  it('setVerbose toggles verbose state and updates visual lines', () => {
+    const originalRecalc = extension.recalculateVisualLines;
+    let called = false;
+    extension.recalculateVisualLines = () => { called = true; };
+    extension.setVerbose({ STATE: 'on' });
+    assert.equal(extension.verboseEnabled, true);
+    assert.equal(called, true);
+    extension.recalculateVisualLines = originalRecalc;
+  });
+
+  it('logMessage records messages using the sprite name from util.target', () => {
+    extension.history = [];
+    extension.logMessage(
+      { MESSAGE: 'test message', TYPE: 'Info' },
+      { target: { isStage: false, sprite: { name: 'Player' } } }
+    );
+
+    const lastLog = extension.history[extension.history.length - 1];
+    assert.equal(lastLog.message, 'test message');
+    assert.equal(lastLog.spriteName, 'Player');
+    assert.equal(lastLog.type, 'Info');
+  });
+
+  it('replaceLastLine updates the final log entry text', () => {
+    extension.history = [{
+      type: 'Info',
+      message: 'first',
+      spriteName: 'Stage',
+      indent: 0,
+      realTime: Date.now(),
+      isFinalizedLoading: false,
+    }];
+
+    extension.replaceLastLine({ MESSAGE: 'updated' });
+    assert.equal(extension.history[0].message, 'updated');
+  });
+
+  it('askPrompt enters prompt mode and resolves after Enter', async () => {
+    extension.visible = true;
+    const promptPromise = extension.askPrompt({ PROMPT: '> ', TYPE: 'text' });
+
+    dom.triggerKeydown({ key: 'a' });
+    dom.triggerKeydown({ key: 'Enter' });
+
+    const result = await promptPromise;
+    assert.equal(result, 'a');
+    assert.equal(extension.isAsking, false);
+    assert.ok(extension.history.some(log => log.type === 'Headless' && log.message.includes('> a')));
+  });
+
+  it('getHistory returns a formatted history string', () => {
+    extension.history = [{
+      type: 'Headless',
+      message: 'hello world',
+      indent: 2,
+      realTime: Date.now(),
+      spriteName: '',
+      isFinalizedLoading: false,
+    }];
+
+    const history = extension.getHistory();
+    assert.equal(history, '  hello world');
   });
 });

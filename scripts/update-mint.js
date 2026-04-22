@@ -31,7 +31,7 @@ const DEFAULT_EXCLUDED_PATHS = [
 const DEFAULT_PATH_ALIASES = {
   [DOCS_MINT_TOOLING_PATH]: 'documentation/mint-tooling',
 };
-const MINT_PACKAGE_NAME = '@triflare/mint-tooling';
+const MINT_PACKAGE_NAMES = ['@triflare/mint-tooling', '@triflare/slateterm'];
 const UPDATE_SCRIPT_PATH = 'scripts/update-mint.js';
 
 export function parseUpdateArgs(argv = process.argv.slice(2)) {
@@ -104,7 +104,7 @@ function normalizeVersion(version) {
 
 export function getMintToolingVersion(packageJson) {
   if (!packageJson || typeof packageJson !== 'object') return null;
-  if (packageJson.name === MINT_PACKAGE_NAME && typeof packageJson.version === 'string') {
+  if (MINT_PACKAGE_NAMES.includes(packageJson.name) && typeof packageJson.version === 'string') {
     return packageJson.version;
   }
 
@@ -116,8 +116,10 @@ export function getMintToolingVersion(packageJson) {
   ];
   for (const dependencyField of dependencyFields) {
     if (!dependencyField || typeof dependencyField !== 'object') continue;
-    const version = dependencyField[MINT_PACKAGE_NAME];
-    if (typeof version === 'string') return version;
+    for (const packageName of MINT_PACKAGE_NAMES) {
+      const version = dependencyField[packageName];
+      if (typeof version === 'string') return version;
+    }
   }
 
   return null;
