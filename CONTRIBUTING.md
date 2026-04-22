@@ -45,7 +45,7 @@ SlateTerm ships a built-in unit-test scaffold powered by Node's native test runn
 
 ## Linting & Formatting Presets
 
-SLateTerm ships TurboWarp-focused ESLint defaults in `eslint.config.mjs`, including checks for:
+SlateTerm ships TurboWarp-focused ESLint defaults in `eslint.config.mjs`, including checks for:
 
 - `turbowarp/require-getinfo`
 - `turbowarp/opcode-naming`

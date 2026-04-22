@@ -125,11 +125,13 @@ describe('SlateTermExtension', () => {
   });
 
   it('setVerbose toggles verbose state and updates visual lines', () => {
+    const originalRecalc = extension.recalculateVisualLines;
     let called = false;
     extension.recalculateVisualLines = () => { called = true; };
     extension.setVerbose({ STATE: 'on' });
     assert.equal(extension.verboseEnabled, true);
     assert.equal(called, true);
+    extension.recalculateVisualLines = originalRecalc;
   });
 
   it('logMessage records messages using the sprite name from util.target', () => {

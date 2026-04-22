@@ -23,9 +23,9 @@ You can modify the opacity of SlateTerm so your stage can be visible as well!
 
 ## Key Features
 
-- **Mint-powered:** SlateTerm is powered by the Mint development toolchain, a bundling tool to develop custom TurboWarp extensions.
+- **Built on a proven bundling toolchain:** SlateTerm is powered by a bundling toolchain for custom TurboWarp extensions.
 - **Easy to use:** There is no heavy configuration or pre-setup to do before using SlateTerm to its fullest. Just import the extension, and start logging!
-- **True terminal:** SlateTerm is powered by some of the same technologies that real terminals like Ubuntu/WIndows' terminal software use.
+- **True terminal:** SlateTerm is powered by some of the same technologies that real terminals like Ubuntu/Windows' terminal software use.
 
 ## Documentation
 
